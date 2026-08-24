@@ -55,7 +55,7 @@ export default function Courses() {
       if (!data || data.length === 0) return;
       setCourses(data.map(c => ({
         title: c.nome,
-        luogo: c.luogo || 'Studio Arcadia Lab',
+        luogo: c.luogo || '',
         giorno: GIORNI[c.giorno_settimana],
         time: `${c.ora_inizio.slice(0, 5)} / ${c.ora_fine.slice(0, 5)}`,
         desc: c.descrizione || '',
