@@ -108,7 +108,7 @@ export default function Hero() {
               <motion.span 
                 animate={{ x: [0, 5, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
-                className="material-symbols-outlined"
+                translate="no" className="material-symbols-outlined"
               >
                 arrow_forward
               </motion.span>

@@ -31,11 +31,11 @@ export default function Footer() {
                 <div className="space-y-2">
                   <div className="text-on-surface-variant leading-relaxed">
                     <a href="tel:+393466770909" className="hover:text-primary transition-colors flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sm">call</span>
+                      <span translate="no" className="material-symbols-outlined text-sm">call</span>
                       +39 346 677 0909
                     </a>
                     <a href="mailto:arcadialabyoga@gmail.com" className="hover:text-primary transition-colors flex items-center gap-2 mt-1">
-                      <span className="material-symbols-outlined text-sm">mail</span>
+                      <span translate="no" className="material-symbols-outlined text-sm">mail</span>
                       arcadialabyoga@gmail.com
                     </a>
                   </div>

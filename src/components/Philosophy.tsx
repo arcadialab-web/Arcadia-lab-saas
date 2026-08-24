@@ -53,7 +53,7 @@ export default function Philosophy() {
               <div className="group p-10 bg-surface-container-low rounded-3xl space-y-6 transition-all duration-500 border border-outline-variant/30 text-center flex flex-col items-center hover:shadow-[0_40px_80px_-15px_rgba(181,106,86,0.15)] hover:bg-white glass-dark h-full">
                 <motion.span 
                   whileHover={{ scale: 1.2, rotate: 10 }}
-                  className="material-symbols-outlined text-primary font-light" 
+                  translate="no" className="material-symbols-outlined text-primary font-light" 
                   style={{ fontSize: '100px' }}
                 >
                   {item.icon}

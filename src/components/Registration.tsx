@@ -56,7 +56,7 @@ export default function Registration() {
       <section className="py-32 bg-surface" id="register">
         <div className="container mx-auto px-6 max-w-2xl text-center">
           <div className="bg-surface-container-lowest p-12 rounded-2xl shadow-xl border border-outline-variant/20">
-            <span className="material-symbols-outlined text-6xl text-primary mb-6 animate-bounce">check_circle</span>
+            <span translate="no" className="material-symbols-outlined text-6xl text-primary mb-6 animate-bounce">check_circle</span>
             <h2 className="text-4xl font-serif italic mb-6">
               {preLancio ? 'Grazie per la tua richiesta!' : 'Messaggio inviato!'}
             </h2>
@@ -104,11 +104,11 @@ export default function Registration() {
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary font-light">phone_iphone</span>
+                  <span translate="no" className="material-symbols-outlined text-primary font-light">phone_iphone</span>
                   <p className="font-medium">+39 346 677 0909</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary font-light">mail</span>
+                  <span translate="no" className="material-symbols-outlined text-primary font-light">mail</span>
                   <a href="mailto:arcadialabyoga@gmail.com" className="font-medium hover:text-primary transition-colors">arcadialabyoga@gmail.com</a>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default function Registration() {
                           return elements;
                         })()}
                       </select>
-                      <span className="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-outline-variant group-focus-within:text-primary transition-colors">expand_more</span>
+                      <span translate="no" className="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-outline-variant group-focus-within:text-primary transition-colors">expand_more</span>
                     </div>
                   </div>
 
@@ -188,7 +188,7 @@ export default function Registration() {
                     <label className="flex items-start gap-4 cursor-pointer group">
                       <div className="relative flex items-center justify-center mt-0.5">
                         <input type="checkbox" name="accetto_certificato" required className="peer appearance-none w-5 h-5 border border-outline-variant rounded-sm checked:bg-primary checked:border-primary transition-colors cursor-pointer" />
-                        <span className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold">check</span>
+                        <span translate="no" className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold">check</span>
                       </div>
                       <span className="text-sm text-on-surface-variant leading-relaxed group-hover:text-on-surface transition-colors">
                         Ho compreso che per completare l'iscrizione è <strong>obbligatorio</strong> presentare un certificato medico di sana e robusta costituzione.
@@ -197,7 +197,7 @@ export default function Registration() {
                     <label className="flex items-start gap-4 cursor-pointer group">
                       <div className="relative flex items-center justify-center mt-0.5">
                         <input type="checkbox" name="accetto_privacy" required className="peer appearance-none w-5 h-5 border border-outline-variant rounded-sm checked:bg-primary checked:border-primary transition-colors cursor-pointer" />
-                        <span className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold">check</span>
+                        <span translate="no" className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold">check</span>
                       </div>
                       <span className="text-sm text-on-surface-variant leading-relaxed group-hover:text-on-surface transition-colors">
                         Ho letto e accetto la <Link to="/privacy-policy" className="text-primary hover:underline underline-offset-4">Privacy Policy</Link> e i <Link to="/terms-of-service" className="text-primary hover:underline underline-offset-4">Termini e Condizioni</Link> *
@@ -215,7 +215,7 @@ export default function Registration() {
                     <label className="flex items-start gap-4 cursor-pointer group">
                       <div className="relative flex items-center justify-center mt-0.5">
                         <input type="checkbox" name="accetto_privacy" required className="peer appearance-none w-5 h-5 border border-outline-variant rounded-sm checked:bg-primary checked:border-primary transition-colors cursor-pointer" />
-                        <span className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold">check</span>
+                        <span translate="no" className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity font-bold">check</span>
                       </div>
                       <span className="text-sm text-on-surface-variant leading-relaxed group-hover:text-on-surface transition-colors">
                         Ho letto e accetto la <Link to="/privacy-policy" className="text-primary hover:underline underline-offset-4">Privacy Policy</Link> e i <Link to="/terms-of-service" className="text-primary hover:underline underline-offset-4">Termini e Condizioni</Link> *

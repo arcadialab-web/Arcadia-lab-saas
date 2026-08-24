@@ -426,11 +426,11 @@ export default function Pricing() {
         {/* Note legali */}
         <div className="max-w-3xl mx-auto space-y-6 opacity-80 mt-8">
           <div className="flex items-start gap-4 p-6 bg-surface-container-low/50 border border-outline-variant/10 rounded-2xl text-sm italic group">
-            <span className="material-symbols-outlined text-primary group-hover:rotate-12 transition-transform">info</span>
+            <span translate="no" className="material-symbols-outlined text-primary group-hover:rotate-12 transition-transform">info</span>
             <p>Gli abbonamenti sono nominativi e non rimborsabili. Il numero di lezioni è consecutivo su base settimanale.</p>
           </div>
           <div className="flex items-start gap-4 p-6 bg-surface-container-low/50 border border-outline-variant/10 rounded-2xl text-sm group">
-            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">card_membership</span>
+            <span translate="no" className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">card_membership</span>
             <p>
               <strong className="text-on-surface uppercase tracking-wider text-xs block mb-1">Tessera associativa annuale — € {tesseraPrezzo}</strong>
               Obbligatoria per l'iscrizione. Include copertura assicurativa. Valida 365 giorni dall'acquisto. È richiesto il certificato medico di buona salute.

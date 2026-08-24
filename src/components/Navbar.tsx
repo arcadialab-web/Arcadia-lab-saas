@@ -174,7 +174,7 @@ export default function Navbar() {
           >
             <motion.span
               animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
-              className="material-symbols-outlined text-3xl font-light"
+              translate="no" className="material-symbols-outlined text-3xl font-light"
             >
               {isMobileMenuOpen ? 'close' : 'menu'}
             </motion.span>

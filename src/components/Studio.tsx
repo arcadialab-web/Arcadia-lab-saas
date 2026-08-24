@@ -34,7 +34,7 @@ export default function Studio() {
                 className="flex items-center gap-6 p-4 rounded-2xl glass-dark border-none shadow-sm transition-all hover:bg-primary/5 group"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                  <span className="material-symbols-outlined text-primary group-hover:text-inherit">location_on</span>
+                  <span translate="no" className="material-symbols-outlined text-primary group-hover:text-inherit">location_on</span>
                 </div>
                 <div>
                   <p className="font-serif group-hover:text-primary transition-colors">Sala Energic Ambiente</p>
@@ -47,7 +47,7 @@ export default function Studio() {
                 className="flex items-center gap-6 p-4 rounded-2xl glass border border-outline-variant/30 shadow-sm transition-all"
               >
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary">directions_walk</span>
+                  <span translate="no" className="material-symbols-outlined text-primary">directions_walk</span>
                 </div>
                 <p className="text-sm text-on-surface-variant tracking-wide">Accesso diretto alla sala dall’ingresso del parco.</p>
               </motion.div>
