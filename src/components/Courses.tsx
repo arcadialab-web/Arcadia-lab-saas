@@ -6,9 +6,19 @@ import { supabase } from '../lib/supabase';
 
 const GIORNI = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
 
-const STATIC_COURSES = [
+interface CourseCard {
+  title: string;
+  luogo: string;
+  giorno: string;
+  time: string;
+  desc: string;
+  btn: string;
+}
+
+const FALLBACK_COURSES: CourseCard[] = [
   {
     title: "Vinyasa Foundations",
+    luogo: "Studio Arcadia Lab",
     giorno: "Martedì",
     time: "19:30 / 20:30",
     desc: "Una pratica fluida e accessibile, pensata per ritrovare le fondamenta del movimento. L’attenzione agli allineamenti rende questa lezione preziosa per costruire una base solida e consapevole.",
@@ -16,6 +26,7 @@ const STATIC_COURSES = [
   },
   {
     title: "Katonah Yoga Inspired",
+    luogo: "Studio Arcadia Lab",
     giorno: "Mercoledì",
     time: "19:00 / 20:00",
     desc: "Una pratica dinamica che unisce geometria, respiro e immaginazione, ispirata al Katonah Yoga. Integra la fluidità del Vinyasa, la struttura dell’Ashtanga e i principi del taoismo.",
@@ -23,6 +34,7 @@ const STATIC_COURSES = [
   },
   {
     title: "Vinyasa Expansion",
+    luogo: "Studio Arcadia Lab",
     giorno: "Giovedì",
     time: "19:00 — 20:00",
     desc: "Una pratica dinamica e creativa che riprende e sviluppa il lavoro del martedì. Aperta a tutti i livelli, pensata per chi desidera esplorare il movimento con curiosità e apertura.",
@@ -33,25 +45,22 @@ const STATIC_COURSES = [
 export default function Courses() {
   const { preLancio } = useSiteSettings();
   const { user } = useAuth();
-  const [courses, setCourses] = useState(STATIC_COURSES);
+  const [courses, setCourses] = useState<CourseCard[]>(FALLBACK_COURSES);
 
   const ctaHref = preLancio ? '#register' : user ? '/dashboard/bookings' : '#pricing';
   const ctaLabel = (btn: string) => preLancio ? btn : user ? 'Prenota lezione' : 'Abbonati';
 
   useEffect(() => {
     supabase.from('courses').select('*').eq('is_attivo', true).order('giorno_settimana').then(({ data }) => {
-      if (!data) return;
-      setCourses(STATIC_COURSES.map(sc => {
-        const match = data.find(c => c.nome === sc.title) || data.find(c => GIORNI[c.giorno_settimana] === sc.giorno);
-        if (!match) return sc;
-        return {
-          ...sc,
-          giorno: GIORNI[match.giorno_settimana],
-          time: `${match.ora_inizio.slice(0, 5)} / ${match.ora_fine.slice(0, 5)}`,
-          desc: match.descrizione || sc.desc,
-          btn: `Prenota ${GIORNI[match.giorno_settimana]}`
-        };
-      }));
+      if (!data || data.length === 0) return;
+      setCourses(data.map(c => ({
+        title: c.nome,
+        luogo: c.luogo || 'Studio Arcadia Lab',
+        giorno: GIORNI[c.giorno_settimana],
+        time: `${c.ora_inizio.slice(0, 5)} / ${c.ora_fine.slice(0, 5)}`,
+        desc: c.descrizione || '',
+        btn: c.testo_pulsante || `Prenota ${GIORNI[c.giorno_settimana]}`
+      })));
     });
   }, []);
 
@@ -93,8 +102,11 @@ export default function Courses() {
                 
                 <div className="flex justify-between items-start mb-6 relative z-10">
                   <div>
-                    <h3 className="text-2xl md:text-3xl font-serif mb-3 transition-colors duration-300 group-hover:text-primary leading-tight">{course.title}</h3>
-                    <motion.span 
+                    <h3 className="text-2xl md:text-3xl font-serif mb-1 transition-colors duration-300 group-hover:text-primary leading-tight">{course.title}</h3>
+                    {course.luogo && (
+                      <p className="text-on-surface-variant text-xs md:text-sm mb-3">{course.luogo}</p>
+                    )}
+                    <motion.span
                       whileHover={{ scale: 1.05 }}
                       className="text-primary font-label tracking-wider text-[10px] md:text-xs uppercase px-3 py-1 bg-primary/10 rounded-full inline-block"
                     >

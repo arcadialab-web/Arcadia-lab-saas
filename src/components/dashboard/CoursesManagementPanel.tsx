@@ -7,6 +7,8 @@ interface Course {
   id: string;
   nome: string;
   descrizione: string;
+  luogo: string;
+  testo_pulsante: string;
   giorno_settimana: number;
   ora_inizio: string;
   ora_fine: string;
@@ -29,7 +31,7 @@ const input = 'w-full bg-surface border border-outline-variant rounded-2xl px-4 
 const label = 'block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1.5';
 
 const emptyForm = {
-  nome: '', descrizione: '', giorno_settimana: 2,
+  nome: '', descrizione: '', luogo: 'Studio Arcadia Lab', testo_pulsante: '', giorno_settimana: 2,
   ora_inizio: '19:00', ora_fine: '20:00',
   posti_max: 15, colore: '#b56a56', is_attivo: true,
 };
@@ -65,6 +67,14 @@ function CourseModal({ course, onClose, onSave }: {
           <div>
             <label className={label}>Descrizione</label>
             <input className={input} value={form.descrizione} onChange={e => set('descrizione', e.target.value)} placeholder="Breve descrizione" />
+          </div>
+          <div>
+            <label className={label}>Luogo</label>
+            <input className={input} value={form.luogo} onChange={e => set('luogo', e.target.value)} placeholder="Es. Studio Arcadia Lab" />
+          </div>
+          <div>
+            <label className={label}>Testo pulsante</label>
+            <input className={input} value={form.testo_pulsante} onChange={e => set('testo_pulsante', e.target.value)} placeholder="Es. Prenota Mercoledì (lascia vuoto per auto)" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
