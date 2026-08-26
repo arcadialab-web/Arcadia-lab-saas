@@ -57,7 +57,9 @@ function UnlockModal({ utente, onClose, onDone }: { utente: any; onClose: () => 
 
   const handleSblocca = async () => {
     setLoading(true);
-    const oggi = new Date().toISOString().split('T')[0];
+    const oggiStr = new Date().toISOString().split('T')[0];
+    // Inizio corsi 2026: chi si abbona prima non perde giorni (eccezione valida solo per quest'anno)
+    const dataInizioStr = oggiStr < '2026-09-08' ? '2026-09-08' : oggiStr;
 
     // Aggiorna profilo
     await supabase.from('profiles').update({
@@ -65,17 +67,17 @@ function UnlockModal({ utente, onClose, onDone }: { utente: any; onClose: () => 
       cert_medico_scadenza: certScadenza || null,
     }).eq('id', utente.id);
 
-    // Attiva abbonamenti in_attesa → calcola date da oggi
+    // Attiva abbonamenti in_attesa → calcola date da inizio corsi (o da oggi se già iniziati)
     const subInAttesa = (utente.subscriptions ?? []).find((s: any) => s.stato === 'in_attesa');
     let dataScadenzaAttivata: string | null = null;
     let planNomeAttivato: string | null = null;
     if (subInAttesa) {
-      const scad = new Date(oggi);
+      const scad = new Date(dataInizioStr + 'T00:00:00');
       scad.setDate(scad.getDate() + subInAttesa.durata_giorni);
       dataScadenzaAttivata = scad.toISOString().split('T')[0];
       await supabase.from('subscriptions').update({
         stato:         'attivo',
-        data_inizio:   oggi,
+        data_inizio:   dataInizioStr,
         data_scadenza: dataScadenzaAttivata,
       }).eq('id', subInAttesa.id);
 
@@ -130,7 +132,7 @@ function UnlockModal({ utente, onClose, onDone }: { utente: any; onClose: () => 
           {(utente.subscriptions ?? []).some((s: any) => s.stato === 'in_attesa') && (
             <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
               <span className="flex-shrink-0">⚠️</span>
-              L'utente ha un abbonamento in attesa — verrà attivato da oggi.
+              L'utente ha un abbonamento in attesa — verrà attivato da oggi (o dall'8 settembre 2026 se sblocchi prima di allora).
             </div>
           )}
           <button onClick={handleSblocca} disabled={loading}
@@ -916,17 +918,21 @@ function MyPlanPanel() {
 
 const GIORNI_IT = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
 
+// Inizio corsi 2026: nessuna lezione prenotabile prima di questa data (eccezione valida solo per quest'anno)
+const INIZIO_CORSI_2026 = new Date('2026-09-08T00:00:00');
+
 function generateSlots(courses: any[], exceptions: any[], weeksAhead = 4) {
   const slots: { course: any; date: Date; dateStr: string }[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const primoGiornoPrenotabile = today < INIZIO_CORSI_2026 ? INIZIO_CORSI_2026 : today;
 
   for (let w = 0; w < weeksAhead; w++) {
     for (const course of courses) {
       const d = new Date(today);
       const diff = (course.giorno_settimana - d.getDay() + 7) % 7;
       d.setDate(d.getDate() + diff + w * 7);
-      if (d < today) continue;
+      if (d < primoGiornoPrenotabile) continue;
       const pad = (n: number) => String(n).padStart(2, '0');
       const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
       const isException = exceptions.some(e => e.course_id === course.id && e.data === dateStr);
@@ -977,6 +983,10 @@ function BookingsPanel() {
 
   const prenota = async (slot: { course: any; dateStr: string }) => {
     if (!user || !sub) return;
+    if (slot.dateStr < INIZIO_CORSI_2026.toISOString().split('T')[0]) {
+      setAlertMsg({ title: 'Corsi non ancora iniziati', text: 'Le lezioni iniziano l\'8 settembre 2026: non è possibile prenotare prima di questa data.' });
+      return;
+    }
     if (sub.lezioni_usate >= sub.lezioni_totali) {
       setAlertMsg({ title: 'Lezioni esaurite', text: 'Hai esaurito tutte le lezioni del tuo abbonamento.' });
       return;

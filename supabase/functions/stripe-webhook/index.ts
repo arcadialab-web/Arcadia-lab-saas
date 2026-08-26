@@ -496,10 +496,14 @@ Deno.serve(async (req) => {
     let dataInizioStr: string | null = null;
     let dataScadenzaStr: string | null = null;
 
+    // Inizio corsi 2026: chi si abbona prima di questa data non perde giorni,
+    // l'abbonamento parte da qui invece che dal giorno del pagamento (eccezione valida solo per quest'anno)
+    const inizioCorsi2026 = new Date('2026-09-08T00:00:00Z');
+
     if (statoSub === 'attivo') {
       const dataInizio = renewalFrom
         ? (() => { const d = new Date(renewalFrom); d.setDate(d.getDate() + 1); return d; })()
-        : oggi;
+        : (oggi < inizioCorsi2026 ? inizioCorsi2026 : oggi);
       const scadAbb = new Date(dataInizio);
       scadAbb.setDate(scadAbb.getDate() + durata);
       dataInizioStr   = dataInizio.toISOString().split('T')[0];
