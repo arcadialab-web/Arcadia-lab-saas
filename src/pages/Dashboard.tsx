@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, Loader2 } from 'lucide-react';
+import { X, ArrowRight, Loader2, Pencil, Check } from 'lucide-react';
 import {
   LayoutDashboard, BarChart2, CreditCard, Users,
   Settings, CalendarCheck, BookOpen, Star, PackagePlus,
@@ -285,7 +285,7 @@ function UsersPanel() {
       </AnimatePresence>
       <AnimatePresence>
         {detailTarget && (
-          <UserDetailModal utente={detailTarget} onClose={() => setDetailTarget(null)} />
+          <UserDetailModal utente={detailTarget} onClose={() => setDetailTarget(null)} onSaved={load} />
         )}
       </AnimatePresence>
       <AnimatePresence>
@@ -469,12 +469,56 @@ function AddUserModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
 }
 
 // ── Modal dettaglio utente ────────────────────────────────────
-function UserDetailModal({ utente, onClose }: { utente: any; onClose: () => void }) {
+const toDateInput = (d: string | null) => d ? new Date(d).toISOString().split('T')[0] : '';
+const dateInputCls = 'w-full bg-white border border-outline-variant/40 rounded-xl px-3 py-2 text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
+const numberInputCls = 'w-20 bg-white border border-outline-variant/40 rounded-xl px-2 py-1.5 text-sm text-on-surface text-center focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
+
+function UserDetailModal({ utente, onClose, onSaved }: { utente: any; onClose: () => void; onSaved: () => void }) {
   const displayName = utente.nome ? `${utente.nome} ${utente.cognome || ''}`.trim() : (utente.email ?? 'Utente');
   const isAdmin = utente.role === 'admin';
   const fmtData = (d: string | null) => d ? new Date(d).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
   const subOrdinati = [...(utente.subscriptions ?? [])].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   const subAttuale = subOrdinati.find((s: any) => s.stato === 'attivo' || s.stato === 'in_attesa') ?? subOrdinati[0] ?? null;
+
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving]   = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [iscrittoIl, setIscrittoIl]           = useState(toDateInput(utente.created_at));
+  const [tesseraScadenza, setTesseraScadenza] = useState(toDateInput(utente.tessera_scadenza));
+  const [subInizio, setSubInizio]             = useState(toDateInput(subAttuale?.data_inizio ?? null));
+  const [subScadenza, setSubScadenza]         = useState(toDateInput(subAttuale?.data_scadenza ?? null));
+  const [lezioniTotali, setLezioniTotali]     = useState(String(subAttuale?.lezioni_totali ?? 0));
+  const [lezioniUsate, setLezioniUsate]       = useState(String(subAttuale?.lezioni_usate ?? 0));
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError('');
+    try {
+      const { error: profErr } = await supabase.from('profiles').update({
+        created_at:       new Date(iscrittoIl).toISOString(),
+        tessera_scadenza: tesseraScadenza || null,
+      }).eq('id', utente.id);
+      if (profErr) throw profErr;
+
+      if (subAttuale) {
+        const { error: subErr } = await supabase.from('subscriptions').update({
+          data_inizio:    subInizio || null,
+          data_scadenza:  subScadenza || null,
+          lezioni_totali: Number(lezioniTotali) || 0,
+          lezioni_usate:  Number(lezioniUsate) || 0,
+        }).eq('id', subAttuale.id);
+        if (subErr) throw subErr;
+      }
+
+      setEditing(false);
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      setSaveError(e?.message || 'Errore durante il salvataggio.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const statoBadge = (stato: string) => {
     const map: Record<string, { label: string; cls: string }> = {
@@ -523,16 +567,27 @@ function UserDetailModal({ utente, onClose }: { utente: any; onClose: () => void
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface-variant flex-shrink-0">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {!isAdmin && !editing && (
+              <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary/15 transition-colors">
+                <Pencil size={13} strokeWidth={2} /> Modifica
+              </button>
+            )}
+            <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface-variant flex-shrink-0">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="px-6 py-5 space-y-3 overflow-y-auto">
           <div className="grid sm:grid-cols-2 gap-3">
             <InfoRow icon={<Mail size={16} strokeWidth={1.5} />} label="Email" value={utente.email ?? '—'} />
             <InfoRow icon={<Phone size={16} strokeWidth={1.5} />} label="Telefono" value={utente.telefono ?? '—'} />
-            <InfoRow icon={<Calendar size={16} strokeWidth={1.5} />} label="Iscritto il" value={fmtData(utente.created_at)} />
+            <InfoRow
+              icon={<Calendar size={16} strokeWidth={1.5} />}
+              label="Iscritto il"
+              value={editing ? <input type="date" value={iscrittoIl} onChange={e => setIscrittoIl(e.target.value)} className={dateInputCls} /> : fmtData(utente.created_at)}
+            />
             <InfoRow
               icon={<Lock size={16} strokeWidth={1.5} />}
               label="Prenotazioni"
@@ -548,12 +603,33 @@ function UserDetailModal({ utente, onClose }: { utente: any; onClose: () => void
                   <p className="text-sm font-bold text-on-surface truncate">{subAttuale.plans?.nome ?? 'Piano'}</p>
                   {statoBadge(subAttuale.stato)}
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-on-surface-variant">
-                  <span>Inizio: <strong className="text-on-surface">{fmtData(subAttuale.data_inizio)}</strong></span>
-                  <span>Scadenza: <strong className="text-on-surface">{fmtData(subAttuale.data_scadenza)}</strong></span>
-                  <span>Lezioni: <strong className="text-on-surface">{subAttuale.lezioni_usate ?? 0} / {subAttuale.lezioni_totali ?? '—'}</strong></span>
-                  <span>Pagato: <strong className="text-on-surface">{subAttuale.prezzo_pagato != null ? `€ ${Number(subAttuale.prezzo_pagato).toLocaleString('it-IT')}` : '—'}</strong></span>
-                </div>
+                {editing ? (
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Inizio</label>
+                      <input type="date" value={subInizio} onChange={e => setSubInizio(e.target.value)} className={dateInputCls} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Scadenza</label>
+                      <input type="date" value={subScadenza} onChange={e => setSubScadenza(e.target.value)} className={dateInputCls} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Lezioni totali</label>
+                      <input type="number" min="0" value={lezioniTotali} onChange={e => setLezioniTotali(e.target.value)} className={numberInputCls} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Lezioni usate</label>
+                      <input type="number" min="0" value={lezioniUsate} onChange={e => setLezioniUsate(e.target.value)} className={numberInputCls} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-on-surface-variant">
+                    <span>Inizio: <strong className="text-on-surface">{fmtData(subAttuale.data_inizio)}</strong></span>
+                    <span>Scadenza: <strong className="text-on-surface">{fmtData(subAttuale.data_scadenza)}</strong></span>
+                    <span>Lezioni: <strong className="text-on-surface">{subAttuale.lezioni_usate ?? 0} / {subAttuale.lezioni_totali ?? '—'}</strong></span>
+                    <span>Pagato: <strong className="text-on-surface">{subAttuale.prezzo_pagato != null ? `€ ${Number(subAttuale.prezzo_pagato).toLocaleString('it-IT')}` : '—'}</strong></span>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="p-4 bg-surface rounded-2xl border border-outline-variant/20 text-sm text-on-surface-variant text-center">
@@ -563,9 +639,33 @@ function UserDetailModal({ utente, onClose }: { utente: any; onClose: () => void
           </div>
 
           <div className="grid sm:grid-cols-2 gap-3">
-            <InfoRow icon={<Award size={16} strokeWidth={1.5} />} label="Scadenza tessera" value={fmtData(utente.tessera_scadenza)} />
+            <InfoRow
+              icon={<Award size={16} strokeWidth={1.5} />}
+              label="Scadenza tessera"
+              value={editing ? <input type="date" value={tesseraScadenza} onChange={e => setTesseraScadenza(e.target.value)} className={dateInputCls} /> : fmtData(utente.tessera_scadenza)}
+            />
             <InfoRow icon={<FileText size={16} strokeWidth={1.5} />} label="Scadenza certificato medico" value={fmtData(utente.cert_medico_scadenza)} />
           </div>
+
+          {editing && (
+            <div className="space-y-2">
+              {saveError && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+                  <AlertCircle size={14} className="flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                  <p>{saveError}</p>
+                </div>
+              )}
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setEditing(false)} disabled={saving} className="px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest text-on-surface-variant hover:bg-surface-container transition-colors">
+                  Annulla
+                </button>
+                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest bg-primary text-on-primary hover:opacity-90 transition-opacity disabled:opacity-60">
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                  Salva modifiche
+                </button>
+              </div>
+            </div>
+          )}
 
           {subOrdinati.length > 1 && (
             <div>
