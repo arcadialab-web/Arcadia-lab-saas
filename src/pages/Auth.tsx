@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Navbar from '../components/Navbar';
 
@@ -50,13 +50,6 @@ export default function Auth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate('/dashboard');
-      } else if (mode === 'register') {
-        if (password !== confirmPassword) { setMessage({ type: 'error', text: 'Le password non coincidono.' }); return; }
-        if (password.length < 6) { setMessage({ type: 'error', text: 'Password di almeno 6 caratteri.' }); return; }
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        setMessage({ type: 'success', text: 'Registrazione completata! Controlla la tua email per confermare l\'account.' });
-        reset();
       } else if (mode === 'reset') {
         if (password !== confirmPassword) { setMessage({ type: 'error', text: 'Le password non coincidono.' }); return; }
         if (password.length < 6) { setMessage({ type: 'error', text: 'Password di almeno 6 caratteri.' }); return; }
@@ -82,14 +75,14 @@ export default function Auth() {
 
   const titles: Record<Mode, string> = {
     login:    'Accedi',
-    register: 'Crea account',
+    register: 'Abbonati',
     recovery: 'Recupera password',
     reset:    'Nuova password',
   };
 
   const subtitles: Record<Mode, string> = {
     login:    'Bentornata/o nel tuo spazio Arcadia Lab.',
-    register: 'Unisciti alla nostra comunità di praticanti',
+    register: 'Scegli il tuo piano per iniziare a praticare',
     recovery: 'Ti invieremo un link via email',
     reset:    'Scegli una nuova password per il tuo account',
   };
@@ -144,16 +137,40 @@ export default function Auth() {
                       onClick={() => switchMode(m)}
                       className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-200 ${mode === m ? 'bg-primary text-white shadow-md' : 'text-on-surface-variant hover:text-on-surface'}`}
                     >
-                      {m === 'login' ? 'Accedi' : 'Registrati'}
+                      {m === 'login' ? 'Accedi' : 'Abbonati'}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Form */}
+            {/* Form / Avviso abbonamento */}
             <div className="px-8 py-7">
               <AnimatePresence mode="wait">
+                {mode === 'register' ? (
+                  <motion.div
+                    key="register-notice"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-center space-y-5"
+                  >
+                    <div className="w-14 h-14 mx-auto rounded-full bg-primary/8 flex items-center justify-center">
+                      <Sparkles size={22} className="text-primary" strokeWidth={1.5} />
+                    </div>
+                    <p className="text-sm text-on-surface-variant leading-relaxed">
+                      Per accedere allo spazio Arcadia Lab è necessario un abbonamento attivo.
+                      Scegliendo un piano riceverai automaticamente le credenziali per accedere al tuo account.
+                    </p>
+                    <Link
+                      to="/#pricing"
+                      className="w-full inline-block bg-primary text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-opacity-90 transition-all"
+                    >
+                      Scopri i piani
+                    </Link>
+                  </motion.div>
+                ) : (
                 <motion.form
                   key={mode}
                   initial={{ opacity: 0, x: 16 }}
@@ -202,7 +219,7 @@ export default function Auth() {
                   )}
 
                   {/* Conferma password */}
-                  {(mode === 'register' || mode === 'reset') && (
+                  {mode === 'reset' && (
                     <div>
                       <label className={labelClass}>Conferma password</label>
                       <input
@@ -257,7 +274,6 @@ export default function Auth() {
                           Caricamento...
                         </span>
                       : mode === 'login' ? 'Accedi al tuo spazio'
-                      : mode === 'register' ? 'Crea il mio account'
                       : mode === 'reset' ? 'Salva nuova password'
                       : 'Invia email di recupero'
                     }
@@ -275,16 +291,19 @@ export default function Auth() {
                     </button>
                   )}
                 </motion.form>
+                )}
               </AnimatePresence>
             </div>
 
-            {/* Footer card */}
-            <div className="px-8 pb-7 text-center">
-              <p className="text-xs text-on-surface-variant">
-                Acquistando un abbonamento ricevi automaticamente le credenziali di accesso.{' '}
-                <Link to="/#pricing" className="text-primary hover:underline">Scopri i piani →</Link>
-              </p>
-            </div>
+            {/* Footer card (nascosto nell'avviso abbonamento, già ha il proprio CTA) */}
+            {mode !== 'register' && (
+              <div className="px-8 pb-7 text-center">
+                <p className="text-xs text-on-surface-variant">
+                  Acquistando un abbonamento ricevi automaticamente le credenziali di accesso.{' '}
+                  <Link to="/#pricing" className="text-primary hover:underline">Scopri i piani →</Link>
+                </p>
+              </div>
+            )}
           </motion.div>
 
           {/* Link torna al sito */}
