@@ -837,6 +837,7 @@ function MyPlanPanel() {
   const lezioniTotali  = sub?.lezioni_totali || 0;
   const lezioniUsate   = sub?.lezioni_usate  || 0;
   const pct            = lezioniTotali > 0 ? Math.round((lezioniUsate / lezioniTotali) * 100) : 0;
+  const inizio         = sub?.data_inizio ? new Date(sub.data_inizio) : null;
   const scadenza       = sub?.data_scadenza ? new Date(sub.data_scadenza) : null;
   const giorniRimasti  = scadenza ? Math.ceil((scadenza.getTime() - Date.now()) / 86400000) : 0;
   const planNome       = sub?.plans?.nome?.split('—')[1]?.trim() ?? sub?.plans?.nome ?? '—';
@@ -920,6 +921,8 @@ function MyPlanPanel() {
                 <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${pct}%` }} />
               </div>
               <p className="text-xs text-on-surface-variant mt-2">
+                Inizio: {inizio?.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) ?? '—'}
+                {' · '}
                 Scadenza: {scadenza?.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) ?? '—'}
               </p>
             </div>
