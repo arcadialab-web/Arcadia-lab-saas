@@ -99,6 +99,7 @@ export default function UserDashboard({ userName }: { userName: string }) {
   const lezioniUsate     = sub?.lezioni_usate  || 0;
   const lezioniRimanenti = lezioniTotali - lezioniUsate;
   const percentuale      = lezioniTotali > 0 ? Math.round((lezioniRimanenti / lezioniTotali) * 100) : 0;
+  const inizio           = sub?.data_inizio ? new Date(sub.data_inizio) : null;
   const scadenza         = sub?.data_scadenza ? new Date(sub.data_scadenza) : null;
   const giorniRimasti    = scadenza ? Math.ceil((scadenza.getTime() - Date.now()) / 86400000) : 0;
   const planNome         = sub?.plans?.nome?.split('—')[1]?.trim() ?? sub?.plans?.nome ?? '—';
@@ -262,14 +263,22 @@ export default function UserDashboard({ userName }: { userName: string }) {
                       </div>
                     </div>
                   ))}
-                  <div className="pt-2.5 border-t border-outline-variant/20">
-                    <p className="text-[10px] text-on-surface-variant font-label uppercase tracking-wider">Scadenza</p>
-                    <p className="font-bold text-xs sm:text-sm text-on-surface mt-0.5">
-                      {scadenza?.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) ?? '—'}
-                    </p>
-                    <p className="text-xs mt-0.5 font-semibold" style={{ color: giorniRimasti < 10 ? '#e57373' : S }}>
-                      {giorniRimasti > 0 ? `${giorniRimasti} giorni rimasti` : 'Abbonamento scaduto'}
-                    </p>
+                  <div className="pt-2.5 border-t border-outline-variant/20 grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] text-on-surface-variant font-label uppercase tracking-wider">Inizio</p>
+                      <p className="font-bold text-xs sm:text-sm text-on-surface mt-0.5">
+                        {inizio?.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) ?? '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-on-surface-variant font-label uppercase tracking-wider">Scadenza</p>
+                      <p className="font-bold text-xs sm:text-sm text-on-surface mt-0.5">
+                        {scadenza?.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) ?? '—'}
+                      </p>
+                      <p className="text-xs mt-0.5 font-semibold" style={{ color: giorniRimasti < 10 ? '#e57373' : S }}>
+                        {giorniRimasti > 0 ? `${giorniRimasti} giorni rimasti` : 'Abbonamento scaduto'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
