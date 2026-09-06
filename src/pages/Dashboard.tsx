@@ -189,7 +189,7 @@ function UsersPanel() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-outline-variant/20">
-                {['Utente', 'Iscrizione', 'Scad. Abbonamento', 'Scad. Tessera', 'Cert. Medico', 'Ruolo', 'Prenotazioni'].map(h => (
+                {['Utente', 'Iscrizione', 'Inizio Abbonamento', 'Scad. Abbonamento', 'Scad. Tessera', 'Cert. Medico', 'Ruolo', 'Prenotazioni'].map(h => (
                   <th key={h} className="text-left px-5 py-4 text-[10px] font-label uppercase tracking-widest text-on-surface-variant">{h}</th>
                 ))}
               </tr>
@@ -201,6 +201,7 @@ function UsersPanel() {
                 const displayName = u.nome ? `${u.nome} ${u.cognome || ''}`.trim() : (u.email ?? 'Utente');
                 const isAdmin = u.role === 'admin';
                 const subAttivo = (u.subscriptions ?? []).find((s: any) => s.stato === 'attivo' || s.stato === 'in_attesa');
+                const inizioAbb = subAttivo?.data_inizio ? new Date(subAttivo.data_inizio) : null;
                 const scadAbb = subAttivo?.data_scadenza ? new Date(subAttivo.data_scadenza) : null;
                 const scadTessera = u.tessera_scadenza ? new Date(u.tessera_scadenza) : null;
                 const scadCert = u.cert_medico_scadenza ? new Date(u.cert_medico_scadenza) : null;
@@ -227,6 +228,9 @@ function UsersPanel() {
                     </td>
                     <td className="px-5 py-4 text-sm text-on-surface-variant">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-on-surface-variant">
+                      {subInAttesa ? '—' : (inizioAbb ? fmtData(inizioAbb) : '—')}
                     </td>
                     <td className="px-5 py-4">
                       {subInAttesa
