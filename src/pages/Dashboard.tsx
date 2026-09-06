@@ -1035,11 +1035,17 @@ const GIORNI_IT = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Vene
 // Inizio corsi 2026: nessuna lezione prenotabile prima di questa data (eccezione valida solo per quest'anno)
 const INIZIO_CORSI_2026 = new Date('2026-09-08T00:00:00');
 
-function generateSlots(courses: any[], exceptions: any[], weeksAhead = 4) {
+function generateSlots(courses: any[], exceptions: any[], weeksAhead = 4, inizioAbbonamento?: string | null) {
   const slots: { course: any; date: Date; dateStr: string }[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const primoGiornoPrenotabile = today < INIZIO_CORSI_2026 ? INIZIO_CORSI_2026 : today;
+  let primoGiornoPrenotabile = today < INIZIO_CORSI_2026 ? INIZIO_CORSI_2026 : today;
+  // Non si può prenotare prima che inizi effettivamente l'abbonamento dell'utente
+  // (può essere stato posticipato manualmente dall'admin rispetto alla data di iscrizione)
+  if (inizioAbbonamento) {
+    const inizioSub = new Date(inizioAbbonamento + 'T00:00:00');
+    if (inizioSub > primoGiornoPrenotabile) primoGiornoPrenotabile = inizioSub;
+  }
 
   for (let w = 0; w < weeksAhead; w++) {
     for (const course of courses) {
@@ -1081,7 +1087,7 @@ function BookingsPanel() {
       supabase.from('courses').select('*').eq('is_attivo', true).order('giorno_settimana'),
       supabase.from('course_exceptions').select('*'),
       supabase.from('course_bookings').select('*').eq('user_id', user.id).eq('stato', 'confermata'),
-      supabase.from('subscriptions').select('id, lezioni_totali, lezioni_usate, stato, plans(frequenza_sett)').eq('user_id', user.id).in('stato', ['attivo', 'in_attesa']).maybeSingle(),
+      supabase.from('subscriptions').select('id, lezioni_totali, lezioni_usate, stato, data_inizio, plans(frequenza_sett)').eq('user_id', user.id).in('stato', ['attivo', 'in_attesa']).maybeSingle(),
       supabase.from('profiles').select('prenotazioni_sbloccate, tessera_scadenza').eq('id', user.id).single(),
     ]);
     setCourses(c || []);
@@ -1099,6 +1105,10 @@ function BookingsPanel() {
     if (!user || !sub) return;
     if (slot.dateStr < INIZIO_CORSI_2026.toISOString().split('T')[0]) {
       setAlertMsg({ title: 'Corsi non ancora iniziati', text: 'Le lezioni iniziano l\'8 settembre 2026: non è possibile prenotare prima di questa data.' });
+      return;
+    }
+    if (sub.data_inizio && slot.dateStr < sub.data_inizio) {
+      setAlertMsg({ title: 'Abbonamento non ancora iniziato', text: `Il tuo abbonamento parte dal ${new Date(sub.data_inizio + 'T00:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}: non puoi prenotare lezioni prima di questa data.` });
       return;
     }
     if (sub.lezioni_usate >= sub.lezioni_totali) {
@@ -1178,7 +1188,7 @@ function BookingsPanel() {
   if (loading) return <div className="text-center py-16 font-serif italic text-on-surface-variant">Caricamento...</div>;
 
   const lezioniRimaste = sub ? sub.lezioni_totali - sub.lezioni_usate : 0;
-  const slots = generateSlots(courses, exceptions, 4);
+  const slots = generateSlots(courses, exceptions, 4, sub?.data_inizio);
   const oggi = new Date(); oggi.setHours(0,0,0,0);
   const tesseraScaduta = tesseraScadenza ? new Date(tesseraScadenza) < oggi : false;
   const tesseraGiorni  = tesseraScadenza ? Math.ceil((new Date(tesseraScadenza).getTime() - oggi.getTime()) / 86400000) : null;
