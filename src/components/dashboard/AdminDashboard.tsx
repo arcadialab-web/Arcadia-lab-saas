@@ -138,7 +138,7 @@ export default function AdminDashboard() {
     setLoadingIncassi(true);
     const [start, end] = rangeIncassi(filtroPeriodo, customStart, customEnd);
     const [{ data: subsData }, { data: ticketsData }] = await Promise.all([
-      supabase.from('subscriptions').select('prezzo_pagato, created_at').gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
+      supabase.from('subscriptions').select('prezzo_pagato, created_at').eq('is_test', false).gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
       supabase.from('event_tickets').select('prezzo_pagato, created_at').gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
     ]);
     const abbonamenti = subsData?.reduce((s, r) => s + (r.prezzo_pagato || 0), 0) || 0;
@@ -171,13 +171,13 @@ export default function AdminDashboard() {
       { data: recentSubs },
     ] = await Promise.all([
       supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('stato', 'attivo'),
-      supabase.from('subscriptions').select('prezzo_pagato').gte('created_at', startMese),
+      supabase.from('subscriptions').select('prezzo_pagato').eq('is_test', false).gte('created_at', startMese),
       supabase.from('event_tickets').select('prezzo_pagato').gte('created_at', startMese),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).neq('role', 'admin'),
       supabase.from('subscriptions').select('*', { count: 'exact', head: true }),
       supabase.from('subscriptions').select('plans(nome)').eq('stato', 'attivo'),
       supabase.from('subscriptions')
-        .select('created_at, stato, prezzo_pagato, profiles(email, nome, cognome), plans(nome)')
+        .select('created_at, stato, prezzo_pagato, is_test, profiles(email, nome, cognome), plans(nome)')
         .order('created_at', { ascending: false }).limit(6),
     ]);
 
@@ -387,7 +387,12 @@ export default function AdminDashboard() {
                   <div key={i} className="flex items-start gap-3 py-2.5 border-b border-outline-variant/10 last:border-0">
                     <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0" style={{ background: a.stato === 'attivo' ? S : '#e57373' }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-on-surface truncate"><strong>{nome}</strong> — {piano}</p>
+                      <p className="text-sm text-on-surface truncate">
+                        <strong>{nome}</strong> — {piano}
+                        {a.is_test && (
+                          <span className="ml-2 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 align-middle">Test</span>
+                        )}
+                      </p>
                       <p className="text-xs text-on-surface-variant mt-0.5">{tempo} · {a.stato} · € {a.prezzo_pagato?.toFixed(0) ?? '—'}</p>
                     </div>
                   </div>

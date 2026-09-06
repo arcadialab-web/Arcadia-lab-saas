@@ -309,6 +309,7 @@ function AddUserModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
   const [aggiungiTessera, setAggiungiTessera] = useState(false);
   const [importoPagato, setImportoPagato] = useState('');
   const [sbloccaPrenotazioni, setSbloccaPrenotazioni] = useState(false);
+  const [isTest, setIsTest] = useState(false);
   const [importoTouched, setImportoTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -348,6 +349,7 @@ function AddUserModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
           aggiungi_tessera: aggiungiTessera,
           importo_pagato: importoPagato === '' ? 0 : Number(importoPagato),
           sblocca_prenotazioni: sbloccaPrenotazioni,
+          is_test: isTest,
         },
       });
       if (fnErr || data?.error) throw new Error(data?.error || fnErr?.message || 'Errore sconosciuto');
@@ -432,8 +434,16 @@ function AddUserModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
               onChange={e => { setImportoTouched(true); setImportoPagato(e.target.value); }}
               className="w-full px-4 py-2.5 rounded-xl border border-outline-variant/30 bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
-            <p className="mt-1.5 text-xs text-on-surface-variant">Precompilato in base al piano scelto, modificabile liberamente. Verrà conteggiato negli incassi nella Panoramica.</p>
+            <p className="mt-1.5 text-xs text-on-surface-variant">
+              Precompilato in base al piano scelto, modificabile liberamente.{' '}
+              {isTest ? 'Non verrà conteggiato negli incassi nella Panoramica (account di test).' : 'Verrà conteggiato negli incassi nella Panoramica.'}
+            </p>
           </div>
+
+          <label className="flex items-center gap-2.5 text-sm text-on-surface cursor-pointer">
+            <input type="checkbox" checked={isTest} onChange={e => setIsTest(e.target.checked)} className="w-4 h-4 rounded accent-primary" />
+            Account di test — non conteggiare l'importo nei ricavi della Panoramica
+          </label>
 
           {error && (
             <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">

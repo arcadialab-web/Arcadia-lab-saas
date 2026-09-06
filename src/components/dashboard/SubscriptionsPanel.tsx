@@ -10,6 +10,7 @@ interface Abbonamento {
   lezioni_usate: number;
   data_scadenza: string;
   prezzo_pagato: number | null;
+  is_test: boolean;
   plans: { nome: string } | null;
   profiles: { nome: string | null; cognome: string | null; email: string | null; stripe_customer_id: string | null } | null;
   user_email: string;
@@ -56,7 +57,7 @@ export default function SubscriptionsPanel() {
       .from('subscriptions')
       .select(`
         id, stato, lezioni_totali, lezioni_usate,
-        data_scadenza, prezzo_pagato,
+        data_scadenza, prezzo_pagato, is_test,
         plans ( nome ),
         profiles ( nome, cognome, email, stripe_customer_id )
       `)
@@ -186,7 +187,12 @@ export default function SubscriptionsPanel() {
                             {getNome(a).charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-on-surface">{getNome(a)}</p>
+                            <p className="text-sm font-semibold text-on-surface flex items-center gap-1.5">
+                              {getNome(a)}
+                              {a.is_test && (
+                                <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Test</span>
+                              )}
+                            </p>
                             <p className="text-xs text-on-surface-variant">{a.user_email}</p>
                           </div>
                         </div>

@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
   try {
     const {
       nome, cognome, email, telefono,
-      plan_id, aggiungi_tessera, importo_pagato, sblocca_prenotazioni,
+      plan_id, aggiungi_tessera, importo_pagato, sblocca_prenotazioni, is_test,
     } = await req.json();
 
     if (!nome || !cognome || !email || !plan_id) {
@@ -230,6 +230,7 @@ Deno.serve(async (req) => {
       stato:          statoSub,
       prezzo_pagato:  prezzoPagato,
       stripe_payment_id: `manual_${crypto.randomUUID()}`,
+      is_test:        is_test === true,
     });
 
     if (subErr) {
