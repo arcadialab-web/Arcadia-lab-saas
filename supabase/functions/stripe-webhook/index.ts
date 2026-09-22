@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
     // Leggi data evento per l'email
     const { data: evento } = await supabase.from('special_events').select('data_evento, luogo').eq('id', eventId).single();
     const dataFmt = evento?.data_evento
-      ? new Date(evento.data_evento).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      ? new Date(evento.data_evento).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' })
       : '—';
 
     // Email biglietto
