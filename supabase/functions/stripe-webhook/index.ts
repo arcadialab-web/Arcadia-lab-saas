@@ -87,6 +87,54 @@ function buildAdminEmail(opts: {
 </body></html>`;
 }
 
+// ── Email admin HTML — nuova iscrizione workshop ───────────────
+function buildEventAdminEmail(opts: {
+  eventTitolo: string; dataFmt: string; nome: string; cognome: string;
+  email: string; telefono: string; codice: string; isAbbonato: boolean; siteUrl: string;
+}): string {
+  const { eventTitolo, dataFmt, nome, cognome, email, telefono, codice, isAbbonato, siteUrl } = opts;
+  return `<!DOCTYPE html>
+<html lang="it">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background:#fdfbf7;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#fdfbf7;padding:40px 16px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+  <tr><td style="background:#2b2927;padding:32px 48px;text-align:center;">
+    <p style="margin:0;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.5);font-family:sans-serif;">Arcadia Lab. — Notifica Admin</p>
+    <h1 style="margin:10px 0 0;font-size:24px;color:#fff;font-weight:400;font-style:italic;">Nuova iscrizione al workshop</h1>
+  </td></tr>
+  <tr><td style="padding:36px 48px;">
+    <p style="margin:0 0 20px;font-size:15px;color:#2b2927;line-height:1.7;font-family:sans-serif;">
+      Qualcuno si è appena iscritto al workshop <strong>${eventTitolo}</strong>.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f1e8;border-radius:16px;margin-bottom:24px;">
+      <tr><td style="padding:20px 24px;">
+        <p style="margin:0 0 12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#5a544c;font-family:sans-serif;">Dettagli iscrizione</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;width:140px;">Evento</td><td style="padding:4px 0;font-size:14px;color:#b56a56;font-weight:700;font-family:sans-serif;">${eventTitolo}</td></tr>
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;">Data</td><td style="padding:4px 0;font-size:14px;color:#2b2927;font-family:sans-serif;">${dataFmt}</td></tr>
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;">Nome</td><td style="padding:4px 0;font-size:14px;color:#2b2927;font-weight:700;font-family:sans-serif;">${nome} ${cognome}</td></tr>
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;">Email</td><td style="padding:4px 0;font-size:14px;color:#2b2927;font-family:sans-serif;">${email}</td></tr>
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;">Telefono</td><td style="padding:4px 0;font-size:14px;color:#2b2927;font-family:sans-serif;">${telefono || '—'}</td></tr>
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;">Codice</td><td style="padding:4px 0;font-size:14px;color:#2b2927;font-family:sans-serif;">${codice}</td></tr>
+          <tr><td style="padding:4px 0;font-size:14px;color:#5a544c;font-family:sans-serif;">Abbonato</td><td style="padding:4px 0;font-size:14px;color:#2b2927;font-family:sans-serif;">${isAbbonato ? 'Sì' : 'No'}</td></tr>
+        </table>
+      </td></tr>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;"><tr><td align="center">
+      <a href="${siteUrl}/dashboard/events" style="display:inline-block;background:#b56a56;color:#fff;text-decoration:none;padding:14px 36px;border-radius:50px;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:sans-serif;">Gestisci eventi</a>
+    </td></tr></table>
+  </td></tr>
+  <tr><td style="background:#f5f1e8;padding:20px 48px;text-align:center;">
+    <p style="margin:0;font-size:12px;color:#a39c90;font-family:sans-serif;font-style:italic;">Arcadia Lab. Yoga · <a href="${siteUrl}" style="color:#b56a56;text-decoration:none;">${siteUrl.replace(/^https?:\/\//, '')}</a></p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
+
 // ── Email HTML ────────────────────────────────────────────────
 function buildEmail(opts: {
   email: string; planNome: string; tempPassword: string;
@@ -356,14 +404,12 @@ Deno.serve(async (req) => {
     // Notifica admin
     await sendEmail(
       'arcadialabyoga@gmail.com',
-      `[Arcadia Lab.] Nuovo biglietto: ${eventTitolo}`,
-      `<p style="font-family:sans-serif;font-size:15px;">Nuovo acquisto biglietto:<br/>
-      <strong>Evento:</strong> ${eventTitolo}<br/>
-      <strong>Data:</strong> ${dataFmt}<br/>
-      <strong>Nome:</strong> ${nome} ${cognome}<br/>
-      <strong>Email:</strong> ${customerEmail}<br/>
-      <strong>Codice:</strong> ${codice}<br/>
-      <strong>Abbonato:</strong> ${isAbbonato ? 'Sì' : 'No'}</p>`,
+      `[Arcadia Lab.] Nuova iscrizione: ${eventTitolo}`,
+      buildEventAdminEmail({
+        eventTitolo, dataFmt, nome, cognome,
+        email: customerEmail, telefono, codice, isAbbonato,
+        siteUrl: Deno.env.get('SITE_URL') ?? 'https://www.arcadialab.it',
+      }),
     );
 
     console.log(`✅ Biglietto evento ${codice} emesso per ${customerEmail}`);
