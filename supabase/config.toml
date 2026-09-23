@@ -1,0 +1,10 @@
+project_id = "fnvchbtcytugkrtnrvyj"
+
+# stripe-webhook riceve le chiamate direttamente da Stripe, che non può
+# fornire un token Supabase — la sicurezza è garantita dalla verifica
+# della firma Stripe già presente nel codice della funzione.
+# Senza questa riga, un deploy futuro reimposta il controllo JWT di
+# default e blocca TUTTI i pagamenti con errore 401 (successo il
+# 22/09/2026, causa di un pagamento non processato).
+[functions.stripe-webhook]
+verify_jwt = false
